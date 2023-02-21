@@ -1,0 +1,97 @@
+---
+- hosts: testgr
+  become: true
+#  gather_facts: true
+#  vars:
+#    servers:
+#       host1:
+#         ip: 192.168.1.20
+#         num: 
+
+
+#start point - this works
+  tasks:
+    - name: set variables
+      set_fact:
+        main_nodes_ips: ["192.168.1.20", "192.168.1.21"]
+        my_remote_ips: "{{ansible_facts.all_ipv4_addresses}}"
+        default_ips: "{{ansible_default_ipv4.address}}"
+#        loop: "{{ansible_facts['all_ipv4_addresses']}}"
+#        main_nodes_ips: "{{groups.testgr.0}}"
+#        main_nodes_ips: "{{ansible_facts['all_ipv4_addresses']}}"
+#      run_once: true
+
+    - name: display the vars set above
+      debug:
+#        var: main_nodes_ips
+        var: my_remote_ips
+#        var: default_ips
+      run_once: true
+#end point - this works
+
+
+#start point - this works
+    - name: Show facts available on the system
+      ansible.builtin.debug:
+#        var: ansible_facts
+         msg:
+            - "{{item}}"
+#            - "{{ansible_facts['all_ipv4_addresses'][0]}}"
+#            - "{{item}}"
+#            - "{{main_nodes_ips}}"
+#            - "{{ansible_facts['all_ipv4_addresses'][0]}}" this works as well
+#            - "{{ansible_facts['all_ipv4_addresses'][0]}}" this works as well
+#            - "{{ansible_facts['all_ipv4_addresses']}}" this works as well
+#            - "{{ ansible_facts.all_ipv4_addresses }}" this works as well
+#        executable: /bin/bash
+#      loop: "{{my_remote_ips}}"
+      loop: "{{my_remote_ips}}" #https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_loops.html#iterating-over-a-dictionary
+#      loop: "{{my_remote_ips}}"
+#end point - this works to here
+
+
+#      stdout:
+#      stderr:
+#        register: pingvar
+#      executable: /bin/bash
+#    - name: Start Apache HTTP Server and Enable it
+#      service: name=apache2 state=stopped enabled=false
+#    - name: Get system's logs
+#      shell: /usr/bin/cat /var/log/syslog | /usr/bin/grep -E 'ansible' |tail
+#      register: syslog_info
+#    - name: Debug info
+#      debug:
+#        var: syslog_info
+
+#    - name: Start Apache HTTP Server and Enable it
+#      service: name=apache2 state=stopped enabled=false
+#    - name: Get system's logs
+#      shell: /usr/bin/cat /var/log/syslog | /usr/bin/grep -E 'ansible' |tail
+#      register: syslog_info
+
+
+#    - name: Debug info
+#      debug:
+#        var: ansible_facts
+    - name: install APACHE2
+      package: name=apache2 state=present
+      with_items: "{{my_remote_ips}}"
+      when: item == "192.168.1.20"
+#      when: my_remote_ips == "192.168.1.20"
+#      when: ansible_os_family == "Debian"
+#      when: ansible_default_ipv4.address == "192.168.1.20"
+#      when: my_remote_ips.item == "192.168.1.20" #if the default IP is in a list, it iterates it until matches the IPv4.
+#      register: wserver
+#    - name: debug the info
+#      debug: var=wserver
+#    - name: start the apache2 service
+#      service: name=apache2 state=started enabled=true
+
+#    - name: Install PHP
+#      package: name=php state=present
+#    - name: start PHP service
+#      service: name=php state=started enabled=true
+
+#    - name: Install php-mysqlnd
+#      package: name=php-mysqlnd state=present
+

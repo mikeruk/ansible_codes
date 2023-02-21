@@ -1,0 +1,14 @@
+- hosts: testgr
+  become: false
+
+  tasks:
+    - name: Debian - Collect package information
+      package_facts:
+         manager: auto
+      register: colinfo
+    - name: Debug the colinfo variable
+      debug: var=colinfo
+
+
+
+

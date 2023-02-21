@@ -1,0 +1,17 @@
+---
+- hosts: testgr
+  become: true
+
+  tasks:
+    - name: Install Apache HTTP Server
+      package: name=apache2 state=present
+
+    - name: Start Apache HTTP Server and Enable it
+      service: name=apache2 state=stopped enabled=false
+    - name: Get system's logs
+      shell: /usr/bin/cat /var/log/syslog | /usr/bin/grep -E 'ansible' |tail
+      register: syslog_info
+    - name: Debug info
+      debug:
+        var: syslog_info
+

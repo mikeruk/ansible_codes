@@ -1,0 +1,21 @@
+---
+- hosts: testgr
+  become: false
+
+  tasks:
+    - name: Install Apache HTTP Server on Red Hat
+      dnf: name=httpd state=present
+      when: ansible_os_family == "RedHat"
+
+    - name: Start Apache HTTP Server and Enable it on Red Hat
+      service: name=httpd state=started enabled=true
+      when: ansible_os_family == "RedHat"
+
+    - name: Install Apache HTTP Server on Debian
+      package: name=apache2 state=present
+      when: ansible_os_family == "Debian"
+
+    - name: Start Apache HTTP Server and Enable it on Debian
+      package: name=apache2 state=stopped enabled=false
+      when: ansible_os_family == "Debian"
+

@@ -1,0 +1,13 @@
+---
+- hosts: testgr
+  become: true
+
+  tasks:
+    - name: Install Apache HTTP Server
+      package: name=apache2 state=present
+
+    - name: Start Apache HTTP Server and Enable it
+      service: name=apache2 state=stopped enabled=false
+
+#    - name: Allow HTTP service in the firewall
+#      firewalld: service=apache2 state=enabled permanent=yes immediate=yes

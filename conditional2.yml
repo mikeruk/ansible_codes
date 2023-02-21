@@ -1,0 +1,17 @@
+---
+- hosts: testgr
+  become: true
+
+  tasks:
+    - name: Ask for the hostname on Red Hat machines
+      shell: hostname
+      register: rslt
+      when: ansible_os_family == "RedHat"
+
+    - name: Ask for the free memory on Debian machines
+      shell: free -m
+
+    - name: Get system's logs
+      shell: /usr/bin/cat /var/log/syslog | /usr/bin/grep -E 'ansible' |tail
+      register: rslt
+      when: ansible_os_family == "Debian"
