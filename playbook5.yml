@@ -1,0 +1,66 @@
+---
+- hosts: testgr
+  become: true
+#  gather_facts: true
+
+  tasks:
+    - name: install APACHE2
+      package: name=apache2 state=present
+      with_items: "{{ansible_facts.all_ipv4_addresses}}"
+      when: item == "192.168.1.20"
+#      register: wserver
+#    - name: debug the info
+#      debug: var=wserver
+
+    - name: start the apache2 service
+      service: name=apache2 state=stopped enabled=false
+      with_items: "{{ansible_facts.all_ipv4_addresses}}"
+      when: item == "192.168.1.20"
+
+    - name: install PHP Server
+      package: name=php,php-mysqlnd state=present
+      with_items: "{{ansible_facts.all_ipv4_addresses}}"
+      when: item == "192.168.1.20"
+
+
+    - name: Installing Mysql  and dependencies
+      package: name=mysql-server,mysql-client,python3-mysqldb,libmysqlclient-dev state=present update_cache=yes
+      with_items: "{{ansible_facts.all_ipv4_addresses}}"
+      when: item == "192.168.1.21"
+
+    - name: start and enable mysql service
+      service: name=mysql state=stopped enabled=false
+      with_items: "{{ansible_facts.all_ipv4_addresses}}"
+      when: item == "192.168.1.21"
+
+
+    - name: creating mysql user (medium_post)
+      mysql_user: name=db_user password=db_pass priv='*.*:ALL' host='%' state=present
+      with_items: "{{ansible_facts.all_ipv4_addresses}}"
+      when: item == "192.168.1.21"
+
+    - name: creating medium_db
+      mysql_db: name=ansible_db state=present
+      with_items: "{{ansible_facts.all_ipv4_addresses}}"
+      when: item == "192.168.1.21"
+
+
+    - name: Enable remote login to mysql
+      lineinfile: path=/etc/mysql/mysql.conf.d/mysqld.cnf regexp='^bind-address' line='bind-address = 0.0.0.0' backup=yes
+      with_items: "{{ansible_facts.all_ipv4_addresses}}"
+      when: item == "192.168.1.21"
+      notify:
+         - Restart mysql
+
+    - name: COPY CONTENT the content of the web folder in the target VM /var/www/html/
+      copy: src=/home/sok/Documents/ansible/2.homework/m2hw/web/ dest=/var/www/html/
+      with_items: "{{ansible_facts.all_ipv4_addresses}}"
+      when: item == "192.168.1.20"
+
+
+
+  handlers:
+    - name: Restart mysql
+      service: name=mysql state=restarted
+      with_items: "{{ansible_facts.all_ipv4_addresses}}"
+      when: item == "192.168.1.21"
